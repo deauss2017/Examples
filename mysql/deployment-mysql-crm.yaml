@@ -1,0 +1,66 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: mysql-config
+data:
+  confluence.cnf: |-
+    [mysqld]
+    server-id=1
+    log-slave-updates=true
+    relay-log=relay-log-bin
+    relay-log-index=relay-log-bin.index
+    sync_binlog=1
+    auto_increment_increment=2
+    auto_increment_offset=2
+    slave-skip-errors=all
+    log-bin=mysql-bin
+    character-set-server=utf8
+    collation-server=utf8_bin
+    default-storage-engine=INNODB
+    max_allowed_packet=256M
+    innodb_log_file_size=2GB
+    transaction-isolation=READ-COMMITTED
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mysql
+  labels:
+    module: service
+    application: mysql
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        module: service
+        application: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: javiersolis/mysql5.7  
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "root"
+        - name: TZ
+          value: "Asia/Hong_Kong"
+        volumeMounts:
+        - name: mysql-configmap
+          mountPath: /etc/mysql/conf.d
+        - name: persistence
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-configmap
+        configMap:
+          name:  mysql-config
+      - name: persistence
+        hostPath:
+          path: /data/mysql/
