@@ -1,0 +1,20 @@
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: production
+  name: organizationservice
+  labels:
+    env: production
+    module: service
+spec:
+  selector:
+    env: production
+    module: service
+    application: organizationservice
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  - name: myadmin
+    port: 8081
+    targetPort: 80
