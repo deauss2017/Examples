@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: rc
+  name: redis
+  labels:
+    env: rc
+    module: cores
+    application: redis
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        env: rc
+        module: cores
+        application: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:4
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 6379
+          name: redis
+          protocol: TCP
+        volumeMounts:
+        - name: persistence
+          mountPath: /data
+      volumes:
+      - name: persistence
+        persistentVolumeClaim:
+          claimName: rc-redis

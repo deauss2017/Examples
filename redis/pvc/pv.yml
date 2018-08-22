@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  namespace: rc
+  name: rc-redis
+  labels:
+    env: rc
+    module: cores
+    application: redis
+spec:
+  capacity:
+    storage: 3Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: "rc-redis"
+  glusterfs:
+    endpoints: gluster-cluster
+    path: /rc-redis
+    readOnly: false
+  persistentVolumeReclaimPolicy: Retain

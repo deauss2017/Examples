@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: rc
+  name: rc-redis
+  labels:
+    env: rc
+    module: cores
+    application: redis
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: "rc-redis"
+  resources:
+     requests:
+       storage: 3Gi
