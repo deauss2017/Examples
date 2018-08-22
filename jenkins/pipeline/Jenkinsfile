@@ -1,0 +1,24 @@
+node {
+	checkout scm
+	def jobName = env.JOB_NAME
+	dir(env.JOB_NAME){
+			git credentialsId: '2d36c1bb-785a-4763-be51-58424c80e8cf', url: 'http://liyue1@192.168.0.218/bitbucket/scm/dyedp/dyedp-cloud-gatewayservice.git'
+			sh "cp ${WORKSPACE}/k8s/dyedp/dyedp-cloud-discoveryservice/Dockerfile ."
+			sh "cp ${WORKSPACE}/k8s/dyedp/dyedp-cloud-discoveryservice/Jenkinsfile ."
+			sh "cp ${WORKSPACE}/k8s/dyedp/dyedp-cloud-discoveryservice/discoveryservice-rc.yaml ."
+			sh "cp ${WORKSPACE}/k8s/dyedp/dyedp-cloud-discoveryservice/discoveryservice-svc.yaml ."
+			sh 'kubectl apply -f ${WORKSPACE}/k8s/dyedp/dyedp-cloud-discoveryservice/discoveryservice-rc.yaml'
+			sh 'kubectl apply -f ${WORKSPACE}/k8s/dyedp/dyedp-cloud-discoveryservice/discoveryservice-svc.yaml'
+		
+		}
+	
+		docker.withRegistry('http://172.16.10.157:5000'){
+		   docker.withServer('tcp://172.16.10.158:2376'){
+		       def app = docker.build "${env.JOB_NAME}"
+		       app.push 'latest'
+		   }
+
+		}
+
+		
+}
