@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: rc
+  name: rc-kafka
+  labels:
+    application: kafka
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: "rc-kafka"
+  resources:
+     requests:
+       storage: 2Gi
