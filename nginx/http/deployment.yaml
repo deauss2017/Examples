@@ -1,0 +1,31 @@
+apiVersion: extensions/v1beta1 
+kind: Deployment 
+metadata: 
+  name: http-app
+spec: 
+  replicas: 1
+  template: 
+    metadata: 
+      labels: 
+        name: http-app
+    spec: 
+      containers: 
+        - name: http
+          image: docker.io/httpd
+          imagePullPolicy: IfNotPresent
+          ports: 
+            - containerPort: 80
+            
+---
+
+apiVersion: v1 
+kind: Service
+metadata: 
+  name: http-app
+spec: 
+  ports: 
+    - port: 10080
+      targetPort: 80
+      protocol: TCP 
+  selector: 
+    name: http-app
