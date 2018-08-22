@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  namespace: production
+  name: production-spaceservice
+  labels:
+    env: production
+    module: service
+    application: spaceservice
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: production-spaceservice
+  glusterfs:
+    endpoints: gluster-cluster
+    path: /production-spaceservice
+    readOnly: false
+  persistentVolumeReclaimPolicy: Retain

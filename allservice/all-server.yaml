@@ -1,0 +1,66 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: production
+  name: spaceservice
+  labels:
+    env: production
+    module: service
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        env: production
+        module: service
+        application: spaceservice
+    spec:
+      imagePullSecrets:
+      - name: production-secret
+      containers:
+      - name: web
+        image: 172.16.105.147:5000/saas/test/service/com-dyrs-mtsp-spaceservice:0.1
+        command:
+        - sh
+        - -c
+        - "java -jar -Dgrails.env=production -Dserver.port=8080 -Duser.timezone=Asia/Hongkong /initfile/*.jar"
+        imagePullPolicy: Always 
+        ports:
+        - containerPort: 8080
+      - name: myadmin
+        image: docker.io/phpmyadmin/phpmyadmin:4.7 
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+        env:
+          - name: PMA_HOST
+            value: "127.0.0.1"
+          - name: PMA_USER
+            value: "root"
+          - name: PMA_PASSWORD
+            value: "root"
+          - name: PMA_PORT
+            value: "3306"
+      - name: mysql
+        image: 172.16.105.147:5000/docker/mysql:5.7.18
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "root"
+        args:
+        - --character-set-server=utf8mb4
+        - --collation-server=utf8mb4_unicode_ci
+        volumeMounts:
+        - name: mysql-service
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-service
+        persistentVolumeClaim:
+          claimName: production-spaceservice

@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: production
+  name: spaceservice-ingress
+spec:
+  rules:
+  - host: spaceservice.production.saas.dyrs.online
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: spaceservice
+          servicePort: 8080
+  - host: spaceservice.mysql.production.saas.dyrs.online
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: spaceservice
+          servicePort: 8081
