@@ -1,0 +1,34 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: rc
+  name: websocket
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        env: rc
+        module: service
+        application: websocket
+    spec:
+      containers:
+      - name: websocket
+        image: registry.cn-hangzhou.aliyuncs.com/dyrs/websocket:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: websocket
+          protocol: TCP
+        volumeMounts:
+        - name: timezone
+          mountPath: /etc/localtime
+      volumes:
+      - name: timezone
+        hostPath:
+          path: "/etc/localtime"

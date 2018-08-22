@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: rc
+  name: websocket-ingress
+  annotations:
+    nginx.org/websocket-services: "websocket"
+spec:
+  rules:
+  - host: websocket.rc.saas.dyrs.online
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: websocket
+          servicePort: 8080
