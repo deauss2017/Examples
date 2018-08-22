@@ -1,0 +1,74 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: kube-ops
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: grafana
+        task: monitoring
+    spec:
+      containers:
+      - name: grafana
+        image: gcr.io/google_containers/heapster-grafana-amd64:v4.4.3
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - name: ca-certificates
+          mountPath: /etc/ssl/certs
+          readOnly: true
+        - name: grafana-data
+          mountPath: /var
+          subPath: grafana
+        env:
+        - name: INFLUXDB_HOST
+          value: influxdb
+        - name: INFLUXDB_SERVICE_URL
+          value: http://influxdb.kube-ops.svc.cluster.local:8086
+        - name: GF_SERVER_HTTP_PORT
+          value: "3000"
+        - name: GF_AUTH_BASIC_ENABLED
+          value: "false"
+        - name: GF_AUTH_ANONYMOUS_ENABLED
+          value: "true"
+        - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+          value: Admin
+        - name: GF_SERVER_ROOT_URL
+          # If you're only using the API Server proxy, set this value instead:
+          # value: /api/v1/proxy/namespaces/kube-system/services/monitoring-grafana/
+          value: /
+      volumes:
+      - name: ca-certificates
+        hostPath:
+          path: /etc/ssl/certs
+      - name: grafana-data
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    kubernetes.io/cluster-service: 'true'
+    kubernetes.io/name: grafana
+  name: grafana
+  namespace: kube-ops
+spec:
+  ports:
+  - port: 3000
+    targetPort: 3000
+  selector:
+    k8s-app: grafana
+  externalIPs:
+  - 192.168.11.10
