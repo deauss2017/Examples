@@ -1,0 +1,21 @@
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: rc
+  name: zookeeper
+  labels:
+    env: rc
+    module: cores
+    application: zookeeper
+spec:
+  type: NodePort
+  selector:
+    env: rc
+    module: cores
+    application: zookeeper
+  ports:
+  - name: client
+    protocol: TCP
+    port: 2181
+    targetPort: 2181
+    nodePort: 32181

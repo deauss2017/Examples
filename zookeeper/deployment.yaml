@@ -1,0 +1,54 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: rc
+  name: zookeeper
+  labels:
+    env: rc
+    module: cores
+    application: zookeeper
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        env: rc
+        module: cores
+        application: zookeeper
+    spec:
+      imagePullSecrets:
+      - name: rc-secret
+      containers:
+      - name: zookeeper
+        image: 172.16.105.147:5000/docker/zookeeper:3.4.11-timezone
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 2181
+          name: client
+          protocol: TCP
+        - containerPort: 2888
+          name: follower
+          protocol: TCP
+        - containerPort: 3888
+          name: election
+          protocol: TCP
+        env:
+        - name: ZOO_MY_ID
+          value: "1"
+        volumeMounts:
+        - name: in-memory
+          mountPath: /data
+        - name: transaction-log
+          mountPath: /datalog
+      volumes:
+      - name: in-memory
+        persistentVolumeClaim:
+          claimName: rc-zookeeper
+      - name: transaction-log
+        persistentVolumeClaim:
+          claimName: rc-zookeeper-log
